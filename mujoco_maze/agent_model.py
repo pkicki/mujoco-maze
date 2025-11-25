@@ -4,9 +4,9 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 import numpy as np
-from gym.envs.mujoco.mujoco_env import MujocoEnv
-from gym.utils import EzPickle
-from gym.spaces import Space
+from gymnasium.envs.mujoco.mujoco_env import MujocoEnv
+from gymnasium.utils import EzPickle
+from gymnasium.spaces import Space
 
 
 class AgentModel(ABC, MujocoEnv, EzPickle):

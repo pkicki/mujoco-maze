@@ -12,7 +12,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 from typing import Any, List, Optional, Tuple, Type
 
-import gym
+import gymnasium as gym
 import numpy as np
 
 from mujoco_maze import maze_env_utils, maze_task
@@ -450,7 +450,7 @@ class MazeEnv(gym.Env):
         if self.wrapped_env.MANUAL_COLLISION:
             old_pos = self.wrapped_env.get_xy()
             old_objballs = self._objball_positions()
-            inner_next_obs, inner_reward, _, info = self.wrapped_env.step(action)
+            inner_next_obs, inner_reward, _, _, info = self.wrapped_env.step(action)
             new_pos = self.wrapped_env.get_xy()
             new_objballs = self._objball_positions()
             # Checks that the new_position is in the wall
@@ -472,13 +472,13 @@ class MazeEnv(gym.Env):
                     idx = self.wrapped_env.model.body_name2id(name)
                     self.wrapped_env.data.xipos[idx][:2] = pos
         else:
-            inner_next_obs, inner_reward, _, info = self.wrapped_env.step(action)
+            inner_next_obs, inner_reward, _, _, info = self.wrapped_env.step(action)
         next_obs = self._get_obs()
         inner_reward = self._inner_reward_scaling * inner_reward
         outer_reward = self._task.reward(next_obs)
         done = self._task.termination(next_obs)
         info["position"] = self.wrapped_env.get_xy()
-        return next_obs, inner_reward + outer_reward, done, info
+        return next_obs, inner_reward + outer_reward, False, done, info
 
     def close(self) -> None:
         self.wrapped_env.close()

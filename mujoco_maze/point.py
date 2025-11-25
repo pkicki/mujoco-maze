@@ -8,7 +8,7 @@ Based on `models`_ and `rllab`_.
 
 from typing import Optional, Tuple
 
-import gym
+import gymnasium as gym
 import mujoco
 import numpy as np
 
@@ -58,7 +58,7 @@ class PointEnv(AgentModel):
         for _ in range(0, self.frame_skip):
             mujoco.mj_step(self.model, self.data)
         next_obs = self._get_obs()
-        return next_obs, 0.0, False, {}
+        return next_obs, 0.0, False, False, {}
 
     def _get_obs(self):
         return np.concatenate(

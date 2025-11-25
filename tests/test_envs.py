@@ -11,7 +11,7 @@ def test_ant_maze(maze_id):
     for i in range(2):
         env = gym.make(f"Ant{maze_id}-v{i}")
         s0 = env.reset()
-        s, _, _, _ = env.step(env.action_space.sample())
+        s, _, _, _, _ = env.step(env.action_space.sample())
         if not env.unwrapped.has_extended_obs:
             assert s0.shape == (30,)
             assert s.shape == (30,)
@@ -22,7 +22,7 @@ def test_point_maze(maze_id):
     for i in range(2):
         env = gym.make(f"Point{maze_id}-v{i}")
         s0 = env.reset()
-        s, r, _, _ = env.step(env.action_space.sample())
+        s, r, _, _, _ = env.step(env.action_space.sample())
         if not env.unwrapped.has_extended_obs:
             assert s0.shape == (7,)
             assert s.shape == (7,)
@@ -40,7 +40,7 @@ def test_point_maze(maze_id):
 def test_subgoal_envs(maze_id):
     env = gym.make(f"Point{maze_id}-v2")
     s0 = env.reset()
-    s, r, _, _ = env.step(env.action_space.sample())
+    s, r, _, _, _ = env.step(env.action_space.sample())
     if not env.unwrapped.has_extended_obs:
         assert s0.shape == (7,)
         assert s.shape == (7,)
@@ -58,7 +58,7 @@ def test_reacher_maze(maze_id):
     for i in range(2):
         env = gym.make(f"Reacher{maze_id}-v{i}")
         s0 = env.reset()
-        s, _, _, _ = env.step(env.action_space.sample())
+        s, _, _, _, _ = env.step(env.action_space.sample())
         if not env.unwrapped.has_extended_obs:
             assert s0.shape == (9,)
             assert s.shape == (9,)
@@ -72,7 +72,7 @@ def test_swimmer_maze(maze_id):
     for i in range(2):
         env = gym.make(f"Swimmer{maze_id}-v{i}")
         s0 = env.reset()
-        s, _, _, _ = env.step(env.action_space.sample())
+        s, _, _, _, _ = env.step(env.action_space.sample())
         if not env.unwrapped.has_extended_obs:
             assert s0.shape == (11,)
             assert s.shape == (11,)
@@ -82,5 +82,5 @@ def test_swimmer_maze(maze_id):
 def test_maze_args(v):
     env = gym.make(f"PointTRoom-v{v}", task_kwargs={"goal": (-2.0, -3.0)})
     assert env.reset().shape == (7,)
-    s, _, _, _ = env.step(env.action_space.sample())
+    s, _, _, _, _ = env.step(env.action_space.sample())
     assert s.shape == (7,)

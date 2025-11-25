@@ -11,6 +11,7 @@ from typing import Callable, Tuple
 import numpy as np
 
 from mujoco_maze.agent_model import AgentModel
+import gymnasium as gym
 
 ForwardRewardFn = Callable[[float, float], float]
 
@@ -51,15 +52,18 @@ class AntEnv(AgentModel):
         self._forward_reward_weight = forward_reward_weight
         self._ctrl_cost_weight = ctrl_cost_weight
         self._forward_reward_fn = forward_reward_fn
-        super().__init__(file_path, 5)
+        high = np.inf * np.ones(29, dtype=np.float32)
+        low = -high
+        observation_space = gym.spaces.Box(low, high)
+        super().__init__(file_path, 5, observation_space)
 
     def _forward_reward(self, xy_pos_before: np.ndarray) -> Tuple[float, np.ndarray]:
-        xy_pos_after = self.sim.data.qpos[:2].copy()
+        xy_pos_after = self.data.qpos[:2].copy()
         xy_velocity = (xy_pos_after - xy_pos_before) / self.dt
         return self._forward_reward_fn(xy_velocity)
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, dict]:
-        xy_pos_before = self.sim.data.qpos[:2].copy()
+        xy_pos_before = self.data.qpos[:2].copy()
         self.do_simulation(action, self.frame_skip)
 
         forward_reward = self._forward_reward(xy_pos_before)
@@ -77,8 +81,8 @@ class AntEnv(AgentModel):
         # No cfrc observation
         return np.concatenate(
             [
-                self.sim.data.qpos.flat[:15],  # Ensures only ant obs.
-                self.sim.data.qvel.flat[:14],
+                self.data.qpos.flat[:15],  # Ensures only ant obs.
+                self.data.qvel.flat[:14],
             ]
         )
 
@@ -88,7 +92,7 @@ class AntEnv(AgentModel):
             low=-0.1,
             high=0.1,
         )
-        qvel = self.init_qvel + self.np_random.randn(self.model.nv) * 0.1
+        qvel = self.init_qvel + self.np_random.random(self.model.nv) * 0.1
 
         # Set everything other than ant to original position and 0 velocity.
         qpos[15:] = self.init_qpos[15:]
@@ -98,15 +102,15 @@ class AntEnv(AgentModel):
 
     def get_ori(self) -> np.ndarray:
         ori = [0, 1, 0, 0]
-        rot = self.sim.data.qpos[self.ORI_IND : self.ORI_IND + 4]  # take the quaternion
+        rot = self.data.qpos[self.ORI_IND : self.ORI_IND + 4]  # take the quaternion
         ori = q_mult(q_mult(rot, ori), q_inv(rot))[1:3]  # project onto x-y plane
         ori = np.arctan2(ori[1], ori[0])
         return ori
 
     def set_xy(self, xy: np.ndarray) -> None:
-        qpos = self.sim.data.qpos.copy()
+        qpos = self.data.qpos.copy()
         qpos[:2] = xy
-        self.set_state(qpos, self.sim.data.qvel)
+        self.set_state(qpos, self.data.qvel)
 
     def get_xy(self) -> np.ndarray:
-        return np.copy(self.sim.data.qpos[:2])
+        return np.copy(self.data.qpos[:2])
